@@ -221,6 +221,15 @@ class FlutterPolls extends HookWidget {
     final hasPollEnded = useState(pollEnded);
     final userHasVoted = useState(hasVoted);
     final isLoading = useState(_isloading);
+    
+    PollOption? votedOptionRefresher = (hasVoted == false && userVotedOptionId == null
+        ? null
+        : pollOptions
+            .where(
+              (pollOption) => pollOption.id == userVotedOptionId,
+            )
+            .toList()
+            .first);
     final votedOption = useState<PollOption?>(hasVoted == false
         ? null
         : pollOptions
@@ -229,12 +238,19 @@ class FlutterPolls extends HookWidget {
             )
             .toList()
             .first);
+    // HACK: This is a hack to fix a bug where the voted option is not displayed when the user has voted using a different component.
+    if(!userHasVoted.value && hasVoted && isLoading.value == false) {
+      userHasVoted.value = true;
+    }
+    // refresh votes calculation to sync with data coming from the server
+    votedOption.value = votedOptionRefresher;
+
     int totalVotesRefresher = pollOptions.fold(0, (acc, option) => acc + option.votes);
     final totalVotes = useState<int>(pollOptions.fold(
       0,
       (acc, option) => acc + option.votes,
     ));
-
+    // refresh total votes count to sync with data coming from the server
     totalVotes.value = totalVotesRefresher;
 
     return Column(
