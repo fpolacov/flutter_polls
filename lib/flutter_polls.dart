@@ -229,13 +229,13 @@ class FlutterPolls extends HookWidget {
             )
             .toList()
             .first);
-
+    int totalVotesRefresher = pollOptions.fold(0, (acc, option) => acc + option.votes);
     final totalVotes = useState<int>(pollOptions.fold(
       0,
       (acc, option) => acc + option.votes,
     ));
 
-    totalVotes.value = totalVotes.value;
+    totalVotes.value = totalVotesRefresher;
 
     return Column(
       key: ValueKey(pollId),
